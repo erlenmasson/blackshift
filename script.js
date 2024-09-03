@@ -1,8 +1,8 @@
 /**
  * Script Purpose: Custom Code for Black Shift
  * Author: Erlen Masson
- * Version: 8
- * Started: 22st August 2024
+ * Version: 9
+ * Started: 3rd September 2024
  */
 
 //
@@ -10,18 +10,18 @@
 //
 
 document.addEventListener("DOMContentLoaded", () => {
+  scrollToHash();
   setupScrollSmoother();
   fadeAnimations();
   cmsHeading();
   recentlyRead();
-  smoothScrollAnchors();
 });
 
 //
 //------- Initial Setup -------//
 //
 
-console.log("Script - Custom v8");
+console.log("Script - Custom v9");
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
@@ -46,11 +46,12 @@ function isTouchDevice() {
 function setupScrollSmoother() {
   if (!isTouchDevice()) {
     ScrollSmoother.create({
-      smooth: 1.5,
+      smooth: 1.5, // Adjust smoothness
       effects: true,
       smoothTouch: 0, // This value is for non-touch devices
     });
-    //  ScrollTrigger.normalizeScroll(true);
+    // Comment out normalizeScroll to test the behavior
+    // ScrollTrigger.normalizeScroll(true);
   }
 }
 
@@ -250,23 +251,20 @@ function addResizeListener() {
 }
 
 //
-//------- Smooth Scroll to URL Anchors -------//
+//------- Scroll to URL Anchors -------//
 //
 
-function smoothScrollAnchors() {
-  // Smooth scroll to section based on URL hash
-  const smoothScrollToSection = () => {
-    const hash = window.location.hash;
-    if (hash) {
-      const targetElement = document.querySelector(hash);
-      if (targetElement) {
-        gsap.to(window, { duration: 1, scrollTo: targetElement });
-      }
+function scrollToHash() {
+  // Check if there is a hash in the URL
+  const hash = window.location.hash;
+  if (hash) {
+    // Find the target element
+    const targetElement = document.querySelector(hash);
+    if (targetElement) {
+      // Directly scroll to the element
+      targetElement.scrollIntoView({ behavior: "auto" }); // Instant scroll for initial load
     }
-  };
-
-  // Scroll after the entire page is loaded
-  window.addEventListener("load", smoothScrollToSection);
+  }
 }
 
 //
