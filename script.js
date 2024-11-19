@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //------- Initial Setup -------//
 //
 
-console.log("Script - Custom v9");
+console.log("Script - Custom v11");
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
