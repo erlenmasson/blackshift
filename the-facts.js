@@ -4,25 +4,33 @@
  * Last Updated: 18th July 2024
  */
 
-console.log("Script - The Facts");
+console.log("Script - The Facts v4");
 
 //
 //------- Spline -------//
 //
 
 function addSlideEventListeners(customSplide) {
-  // Add event listener for onMoveEnd to pause autoplay after the last slide
-  customSplide.on("move.end", () => {
-    if (customSplide.index === customSplide.length - 1) {
-      customSplide.Components.Autoplay.pause();
-    }
-  });
-
-  // Add event listener to handle clicks on slides
+  // Add event listener to handle clicks on slides and their child elements
   customSplide.root
     .querySelectorAll(".splide__slide")
     .forEach((slide, index) => {
       slide.addEventListener("click", (event) => {
+        const button = event.target.closest(".button");
+
+        // Check if a .button or any other specific child element was clicked
+        if (button) {
+          customSplide.Components.Autoplay.pause();
+
+          // Allow the child button's default action to proceed
+          // If needed, call any specific function related to the button here
+          // E.g., openShareDialog(button);
+
+          // Do not stop propagation if you want the button to perform its intended functionality
+          return;
+        }
+
+        // Existing logic to handle slide click
         if (slide.classList.contains("is-active")) {
           if (event.target.classList.contains("poster")) {
             if (customSplide.Components.Autoplay.isPaused()) {
@@ -76,7 +84,6 @@ function posterSliderAuto() {
     customSplide.mount(window.splide.Extensions);
   }
 }
-posterSliderAuto();
 
 // Research Posters Slider without Autoplay
 function posterSlider() {
@@ -109,4 +116,9 @@ function posterSlider() {
     customSplide.mount();
   }
 }
-posterSlider();
+
+// Initialize all functions
+document.addEventListener("DOMContentLoaded", () => {
+  posterSlider();
+  posterSliderAuto();
+});

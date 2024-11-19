@@ -1,8 +1,8 @@
 /**
  * Script Purpose: Custom Code for Black Shift
  * Author: Erlen Masson
- * Version: 9
- * Started: 3rd September 2024
+ * Version: 11
+ * Started: 18th November
  */
 
 //
@@ -12,9 +12,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   scrollToHash();
   setupScrollSmoother();
-  fadeAnimations();
   cmsHeading();
-  recentlyRead();
+  gradientBg();
 });
 
 //
@@ -24,16 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
 console.log("Script - Custom v9");
 
 // Register GSAP plugins
-gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
-// Array to store SplitText instances
-var splitTextInstances = [];
-
-//
-//------- GSAP Animations -------//
-//
-
-// Function to check if the device is a touch device
+// Check if the device is a touch device
 function isTouchDevice() {
   return (
     "ontouchstart" in window ||
@@ -56,198 +48,65 @@ function setupScrollSmoother() {
 }
 
 //
-//------- Text Animations-------//
+//------- Gradient Background Animation -------//
 //
 
-// Function for fade animations
-function fadeAnimations() {
-  var fadeStart = gsap.utils.clamp(
-    0,
-    window.innerHeight,
-    window.innerWidth < 768 ? "top 100%" : "top 85%"
-  ); // Clamped fadeStart value
-  var fadeEnd = window.innerWidth < 768 ? "top 60%" : "bottom 75%"; // Mobile : Desktop
-  var fadeEnd2 = window.innerWidth < 768 ? "top 50%" : "bottom 75%"; // Mobile : Desktop
+function gradientBg() {
+  const elements = document.querySelectorAll(".gradient-bg");
 
-  // Clear previous instances
-  splitTextInstances.forEach((instance) => instance.revert());
-  splitTextInstances = [];
+  if (elements.length === 0) return;
 
-  // Fade-In Text by Characters
-  gsap.utils.toArray("[data-fade='chars']").forEach((element) => {
-    const split = new SplitText(element, { type: "chars" });
-    splitTextInstances.push(split); // Store instance
-    gsap.set(split.chars, { opacity: 0 });
-    gsap
-      .timeline({
-        scrollTrigger: {
-          trigger: element,
-          start: fadeStart,
-          end: fadeEnd2,
-          scrub: true,
-        },
-      })
-      .to(split.chars, {
-        opacity: 1,
-        ease: "power1.inOut",
-        stagger: 0.05,
-      });
+  function hexToRgb(hex) {
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (_, r, g, b) => r + r + g + g + b + b);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(
+          result[3],
+          16
+        )}`
+      : null;
+  }
+
+  elements.forEach((element) => {
+    const styles = getComputedStyle(element);
+
+    const accentHex = styles.getPropertyValue("--color--accent").trim();
+    const accentTwoHex = styles.getPropertyValue("--color--accent-two").trim();
+    const accentThreeHex = styles
+      .getPropertyValue("--color--accent-three")
+      .trim();
+
+    const accent = hexToRgb(accentHex);
+    const accentTwo = hexToRgb(accentTwoHex);
+    const accentThree = hexToRgb(accentThreeHex);
+
+    if (!accent || !accentTwo || !accentThree) return;
+
+    const b1 = `
+          linear-gradient(217deg, rgba(${accent}, 1), rgba(${accent}, 0) 50%),
+          linear-gradient(127deg, rgba(${accentTwo}, 1), rgba(${accentTwo}, 1) 75%),
+          linear-gradient(336deg, rgba(${accentThree}, 1), rgba(${accentThree}, 0) 50%)
+        `;
+
+    const b2 = `
+          linear-gradient(17deg, rgba(${accentTwo}, 1), rgba(${accentTwo}, 0) 50%),
+          linear-gradient(200deg, rgba(${accentThree}, 1), rgba(${accentThree}, 1) 75%),
+          linear-gradient(336deg, rgba(${accent}, 1), rgba(${accent}, 0) 50%)
+        `;
+
+    gsap.fromTo(
+      element,
+      { background: b1 },
+      {
+        background: b2,
+        ease: "none",
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+      }
+    );
   });
-
-  // Fade-In Text by Words
-  gsap.utils.toArray("[data-fade='words']").forEach((element) => {
-    const split = new SplitText(element, { type: "words" });
-    splitTextInstances.push(split); // Store instance
-    gsap.set(split.words, { opacity: 0 });
-    gsap
-      .timeline({
-        scrollTrigger: {
-          trigger: element,
-          start: fadeStart,
-          end: fadeEnd,
-          scrub: true,
-        },
-      })
-      .to(split.words, {
-        opacity: 1,
-        ease: "power1.inOut",
-        stagger: 0.1,
-      });
-  });
-
-  // Fade-In Text by Lines
-  gsap.utils.toArray("[data-fade='lines']").forEach((element) => {
-    const split = new SplitText(element, { type: "lines" });
-    splitTextInstances.push(split); // Store instance
-    gsap.set(split.lines, { opacity: 0 });
-    gsap
-      .timeline({
-        scrollTrigger: {
-          trigger: element,
-          start: fadeStart,
-          end: fadeEnd,
-          scrub: true,
-          // markers: true,
-        },
-      })
-      .to(split.lines, {
-        opacity: 1,
-        ease: "power1.inOut",
-        stagger: 0.15,
-      });
-  });
-
-  // Fade-In Rich Text by Lines
-  gsap.utils.toArray("[data-fade='rich-text']").forEach((richTextElement) => {
-    gsap.utils
-      .toArray(
-        richTextElement.querySelectorAll(
-          "h1, h2, h3, h4, h5, h6, p, li, li::marker, blockquote"
-        )
-      )
-      .forEach((element) => {
-        const split = new SplitText(element, { type: "lines" });
-        splitTextInstances.push(split); // Store instance
-        gsap.set(split.lines, { opacity: 0 });
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: element,
-              start: fadeStart,
-              end: fadeEnd,
-              scrub: true,
-            },
-          })
-          .to(split.lines, {
-            opacity: 1,
-            ease: "power1.inOut",
-            stagger: 0.15,
-          });
-      });
-  });
-
-  // Fade-In Elements
-  gsap.utils.toArray("[data-fade='element']").forEach((element) => {
-    gsap.set(element, { opacity: 0, y: 0 });
-    gsap
-      .timeline({
-        scrollTrigger: {
-          trigger: element,
-          start: "top 90%",
-          end: "top 60%",
-          scrub: true,
-        },
-      })
-      .to(element, {
-        opacity: 1,
-        ease: "power2.inOut",
-        y: 0,
-      });
-  });
-
-  // Fade-In List
-  gsap.utils.toArray("[data-fade='list']").forEach((list) => {
-    // Convert the HTMLCollection of children to an array for easier manipulation
-    const items = gsap.utils.toArray(list.children); // Now targets all direct children as an array
-
-    items.forEach((item) => {
-      gsap.set(item, { opacity: 0 }); // Initial state for each item
-
-      gsap.to(item, {
-        opacity: 1,
-        ease: "power2.inOut",
-        scrollTrigger: {
-          trigger: item,
-          start: fadeStart,
-          end: fadeEnd,
-          scrub: true,
-          //markers: true, // Uncomment for debugging
-        },
-      });
-    });
-  });
-}
-
-// Ensure fonts are loaded before running animations
-document.fonts.ready
-  .then(function () {
-    console.log("Fonts loaded successfully");
-    fadeAnimations();
-  })
-  .catch(function () {
-    console.error("Font loading error");
-  });
-
-//
-//------- Resize Handling -------//
-//
-
-// Debounce function to throttle the resize event handler
-function debounce(func) {
-  var timer;
-  return function (event) {
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(func, 150, event); // 150ms seems like a good sweetspot
-  };
-}
-
-// Optional: Define the resize event handling logic
-function handleResize() {
-  console.log("Window resized, refreshing animations");
-
-  // Revert SplitText instances
-  splitTextInstances.forEach((instance) => instance.revert());
-
-  // Refresh ScrollTrigger
-  ScrollTrigger.refresh();
-
-  // Re-initialize the fade animations on resize
-  fadeAnimations();
-}
-
-// Optional: Add event listener for window resize if needed
-function addResizeListener() {
-  window.addEventListener("resize", debounce(handleResize));
 }
 
 //
@@ -284,25 +143,5 @@ function cmsHeading() {
       }
     );
     heading.innerHTML = wrappedContent;
-  });
-}
-//
-//------- Recently Read -------//
-//
-
-function recentlyRead() {
-  const posterLinks = document.querySelectorAll(".poster_link");
-
-  posterLinks.forEach((posterLink) => {
-    posterLink.addEventListener("click", () => {
-      const recentlyRead = posterLink.querySelector(".recently-read");
-
-      if (recentlyRead) {
-        setTimeout(() => {
-          recentlyRead.style.display = "flex"; // Show or move the 'recently-read' element
-          posterLink.appendChild(recentlyRead);
-        }, 3000); // 3 seconds delay
-      }
-    });
   });
 }
