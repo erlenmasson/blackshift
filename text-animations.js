@@ -1,11 +1,11 @@
 /**
  * Script Purpose: TextAnimations
  * Author: Erlen Masson
- * Version: 1.0
- * Started: 19th November 2024
+ * Version: 3.1
+ * Started: 5 Feb 2025
  */
 
-console.log("Script - Text Animations");
+console.log("Script - Text Animations v3");
 
 // ------- Configurable Parameters ------- //
 const fadeStart = window.innerWidth < 768 ? "top 100%" : "top 85%";
@@ -46,7 +46,10 @@ function fadeCharacters() {
   splitTextInstances = [];
 
   gsap.utils.toArray("[data-text-animate='chars']").forEach((element) => {
-    const split = new SplitText(element, { type: "chars" });
+    const split = new SplitText(element, {
+      type: "chars",
+      tag: "span", // Use spans
+    });
     splitTextInstances.push(split);
     gsap.set(split.chars, { opacity: 0 });
     gsap
@@ -69,7 +72,10 @@ function fadeCharacters() {
 // Fade by Words
 function fadeWords() {
   gsap.utils.toArray("[data-text-animate='words']").forEach((element) => {
-    const split = new SplitText(element, { type: "words" });
+    const split = new SplitText(element, {
+      type: "words",
+      tag: "span", // Use spans
+    });
     splitTextInstances.push(split);
     gsap.set(split.words, { opacity: 0 });
     gsap
@@ -92,7 +98,10 @@ function fadeWords() {
 // Fade by Lines
 function fadeLines() {
   gsap.utils.toArray("[data-text-animate='lines']").forEach((element) => {
-    const split = new SplitText(element, { type: "lines" });
+    const split = new SplitText(element, {
+      type: "lines",
+      // tag: "span", // Use spans
+    });
     splitTextInstances.push(split);
     gsap.set(split.lines, { opacity: 0 });
     gsap
@@ -122,7 +131,10 @@ function fadeRichText() {
           richTextElement.querySelectorAll("h1, h2, h3, p, li, blockquote")
         )
         .forEach((element) => {
-          const split = new SplitText(element, { type: "lines" });
+          const split = new SplitText(element, {
+            type: "lines",
+            tag: "span", // Use spans
+          });
           splitTextInstances.push(split);
           gsap.set(split.lines, { opacity: 0 });
           gsap
